@@ -1006,7 +1006,7 @@ for (let i = 0; i < rawCitizens.length; i++) {
     })
 }
 
-//отсортировали массив жителей по городам, потом районам, улицам и т.п.
+/*//отсортировали массив жителей по городам, потом районам, улицам и т.п.
 let sortedCitizens = rawCitizens.sort(function (citiz1, citiz2) {
     for (let i = 0; i < citiz1.groups.length; i++) {
         let res = citiz1.groups[i].name.localeCompare(citiz2.groups[i].name);
@@ -1015,5 +1015,22 @@ let sortedCitizens = rawCitizens.sort(function (citiz1, citiz2) {
         }
     }
 })
-console.log(sortedCitizens);
+console.log(sortedCitizens);*/
 
+let ass = {};
+rawCitizens.forEach(citizen => {
+    for (let i = 0; i <= citizen.groups.length; i++) {
+        if(i === citizen.groups.length){
+            //дописать id:имя в последнюю строку
+            break
+        }
+        // продумать проверку слиянием! взять идею из корзины
+        // НЕ перезатирать!!! добавить проверку на наличие!
+        if(i === 0 ) { //начальный элемент просто сохраняем
+            ass[citizen.groups[i].name] = {};
+            console.log(ass)
+        }
+    }
+})
+
+console.log(ass)

@@ -7,18 +7,18 @@
         <th> Имя</th>
       </tr>
       <tr v-for="citizen in citizens" :key="citizen">
-        <td v-for="group in citizen.groups" :key="group">{{group.name}}</td>
+        <td v-for="group in citizen.groups" :key="group" :class=group.type :data=group.name>{{group.name}}</td>
         <td @mouseover="onHover">{{citizen.name}}</td>
-        <div
-            id="tooltip"
-            :style="{ top: `${clientY}px`, left: `${clientX}px` }"
-            v-if="show"
-            @mouseout="show = false"
-        >
-          {{ citizen.city_id }}
-        </div>
+<!--        <div  id="tooltip"-->
+<!--              :style="{ top: `${clientY}px`, left: `${clientX}px` }"-->
+<!--              v-if="show"-->
+<!--              @mouseout="show = false"-->
+<!--        >-->
+<!--          {{ citizen.city_id }}-->
+<!--        </div>-->
       </tr>
     </table>
+
   </div>
 </template>
 
@@ -26,8 +26,10 @@
 import cities from '../../public/taskFiles/cities.json';
 import citizens from '../../public/taskFiles/updCitizens.json';
 
-//будем исходить из того, что в массиве groups тип адреса всегда идёт от большего к меньшему.
-// то есть, страна-> город, город-> улица и т.д.
+/*будем исходить из того, что в массиве groups тип адреса всегда идёт от большего к меньшему.
+то есть, страна-> город, город-> улица и т.д.*/
+
+// 1. Сортируем по алфавиту по полям группы
 citizens.sort(function (citiz1, citiz2) {
   for (let i = 0; i < citiz1.groups.length; i++) {
   let res = citiz1.groups[i].name.localeCompare(citiz2.groups[i].name);
@@ -36,6 +38,15 @@ citizens.sort(function (citiz1, citiz2) {
     }
   }
 })
+
+
+// 2. Выносим поля группы и их значения в поля горожанина(для удобства доступа)
+// citizens.forEach(citizen => {
+//   citizen.groups.forEach(group => {
+//     citizen[group.type] = group.name
+//   })
+// })
+
 console.log(citizens)
 
 export default {
