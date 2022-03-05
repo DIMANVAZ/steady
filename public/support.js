@@ -1,3 +1,7 @@
+
+//файл-помогайка для исправлений в citizens.json
+//присвоить каждому жителю уникальный id + проставить корректные city_id
+
 const fs = require('fs');
 fs.readFile('./taskFiles/citizens.json', (err, data) => {
     if (err) throw err;
