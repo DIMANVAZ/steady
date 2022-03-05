@@ -7,8 +7,16 @@
         <th> Имя</th>
       </tr>
       <tr v-for="citizen in citizens" :key="citizen">
-        <th v-for="group in citizen.groups" :key="group">{{group.name}}</th>
-        <th>{{citizen.name}}</th>
+        <td v-for="group in citizen.groups" :key="group">{{group.name}}</td>
+        <td @mouseover="onHover">{{citizen.name}}</td>
+        <div
+            id="tooltip"
+            :style="{ top: `${clientY}px`, left: `${clientX}px` }"
+            v-if="show"
+            @mouseout="show = false"
+        >
+          {{ citizen.city_id }}
+        </div>
       </tr>
     </table>
   </div>
@@ -17,6 +25,9 @@
 <script>
 import cities from '../../public/taskFiles/cities.json';
 import citizens from '../../public/taskFiles/updCitizens.json';
+
+//будем исходить из того, что в массиве groups тип адреса всегда идёт от большего к меньшему.
+// то есть, страна-> город, город-> улица и т.д.
 citizens.sort(function (citiz1, citiz2) {
   for (let i = 0; i < citiz1.groups.length; i++) {
   let res = citiz1.groups[i].name.localeCompare(citiz2.groups[i].name);
@@ -35,8 +46,19 @@ export default {
   data(){
     return{
       cities:cities,
-      citizens:citizens
+      citizens:citizens,
+      show: false,
+      clientX: 0,
+      clientY: 0
     }
+  },
+  methods: {
+    onHover(e) {
+      const { clientX, clientY } = e;
+      this.show = true;
+      this.clientX = clientX;
+      this.clientY = clientY;
+    },
   }
 }
 </script>
@@ -57,4 +79,11 @@ li {
 a {
   color: #42b983;
 }
+#tooltip {
+  border: 1px solid black;
+  padding: 5px;
+  position: absolute;
+  background-color: white;
+}
+
 </style>
