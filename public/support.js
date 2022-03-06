@@ -1017,20 +1017,19 @@ let sortedCitizens = rawCitizens.sort(function (citiz1, citiz2) {
 })
 console.log(sortedCitizens);*/
 
-let ass = {};
-rawCitizens.forEach(citizen => {
-    for (let i = 0; i <= citizen.groups.length; i++) {
-        if(i === citizen.groups.length){
-            //дописать id:имя в последнюю строку
-            break
-        }
-        // продумать проверку слиянием! взять идею из корзины
-        // НЕ перезатирать!!! добавить проверку на наличие!
-        if(i === 0 ) { //начальный элемент просто сохраняем
-            ass[citizen.groups[i].name] = {};
-            console.log(ass)
-        }
-    }
-})
 
-console.log(ass)
+let ass = {};
+let citizen = rawCitizens[0]
+
+
+for (let i = 0; i <= citizen.groups.length; i++) {
+    if(i === citizen.groups.length){
+        break
+    }
+    let step = citizen.groups[i].name;
+    console.log('step = ',step)
+
+}
+console.log('ass = ',ass)
+
+
