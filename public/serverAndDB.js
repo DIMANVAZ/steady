@@ -32,6 +32,9 @@ exP.get('/getCiCi',function (request,response){
 
     Promise.all([citiesPromise, citizenPromise]).then(function (value) {
         //console.log(value[1]);
+        // отключил CORS, чтобы получить ответ с локального сервера на Фронт
+        response.setHeader('Access-Control-Allow-Origin', '*');
+        response.setHeader('Access-Control-Allow-Headers', 'origin, content-type, accept');
         response.send(JSON.parse(JSON.stringify({cities:value[0],citizens:value[1]})));
     });
 })

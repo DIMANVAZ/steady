@@ -3,12 +3,11 @@
     <h1>{{ msg }}</h1>
     <table>
       <tr>
-        <th v-for="group in citizens[0].groups" :key="group">{{group.type}}</th>
-        <th> Имя</th>
+        <th v-for="field in Object.keys(citizens[0])" :key="field">{{field}}</th>
       </tr>
       <tr v-for="citizen in citizens" :key="citizen">
-        <td v-for="group in citizen.groups" :key="group" :class=group.type :data=group.name>{{group.name}}</td>
-        <td @mouseover="onHover">{{citizen.name}}</td>
+        <td v-for="value in Object.values(citizen)" :key="value" :class="x" :data="x">{{value}}</td>
+        <td @mouseover="onHover"></td>
 <!--        <div  id="tooltip"-->
 <!--              :style="{ top: `${clientY}px`, left: `${clientX}px` }"-->
 <!--              v-if="show"-->
@@ -26,8 +25,8 @@
 import cities from '../../public/taskFiles/cities.json';
 import citizens from '../../public/taskFiles/updCitizens.json';
 
-/*будем исходить из того, что в массиве groups тип адреса всегда идёт от большего к меньшему.
-то есть, страна-> город, город-> улица и т.д.*/
+/*/!*будем исходить из того, что в массиве groups тип адреса всегда идёт от большего к меньшему.
+то есть, страна-> город, город-> улица и т.д.*!/
 
 // 1. Сортируем по алфавиту по полям группы
 citizens.sort(function (citiz1, citiz2) {
@@ -39,15 +38,12 @@ citizens.sort(function (citiz1, citiz2) {
   }
 })
 
-
 // 2. Выносим поля группы и их значения в поля горожанина(для удобства доступа)
 // citizens.forEach(citizen => {
 //   citizen.groups.forEach(group => {
 //     citizen[group.type] = group.name
 //   })
-// })
-
-console.log(citizens)
+// })*/
 
 export default {
   name: 'HelloWorld',
@@ -56,14 +52,26 @@ export default {
   },
   data(){
     return{
-      cities:cities,
-      citizens:citizens,
+      cities,
+      citizens,
       show: false,
       clientX: 0,
       clientY: 0
     }
   },
+  created(){
+    this.fetcher();
+  },
   methods: {
+    async fetcher(){//---запрос к серверу для получения городов и горожан из БД------
+      try{
+        let citiesAndCitizens = await fetch('http://127.0.0.1:3003/getCiCi')
+            .then(response => response.json())
+        this.cities = citiesAndCitizens.cities;
+        this.citizens = citiesAndCitizens.citizens;
+        console.log(this.citizens)
+      } catch(e){ console.error(`Error from Ierarchical.vue/created(): `,e)}
+    },
     onHover(e) {
       const { clientX, clientY } = e;
       this.show = true;
