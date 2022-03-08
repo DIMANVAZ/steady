@@ -10,7 +10,7 @@
       </tr>
     </table>
             <div  id="tooltip"
-                  :style="{ top: `${clientY}px`, left: `${clientX}px` }"
+                  :style="{ top: `${vertPos}px`, left: `${horizPos}px` }"
                   v-if="show"
                   @mouseout="clear"
             >
@@ -54,8 +54,8 @@ export default {
       citizens,
       detectedCity:'',
       show: false,
-      clientX: 0,
-      clientY: 0
+      horizPos: 0,
+      vertPos: 0
     }
   },
   created(){
@@ -79,19 +79,17 @@ export default {
     },
     onHover(e) {
       if(e.target.classList.value === 'name'){
-        console.log(e.target.dataset.city)
+
         this.detectedCity = e.target.dataset.city;
-        const { clientX, clientY } = e;
+        const { pageX,pageY } = e;
+
         this.show = true;
-        this.clientX = clientX;
-        this.clientY = clientY;
+        this.horizPos = pageX;
+        this.vertPos = pageY;
       }
     },
     clear(){
       this.show = false;
-      this.clientX = 0;
-      this.clientY = 0;
-      alert('clr')
     }
   }
 }
