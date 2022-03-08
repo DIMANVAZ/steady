@@ -7,6 +7,34 @@ const conn = mysql2.createConnection({
     user:"u1476436_steuser",
     password:"u1476436_steUser"
 });
+const express = require('express');
+const exP = express();
+const port = process.env.PORT || 3003;
+exP.listen(port, ()=>{  console.log(`server started at port: ${port}`);})
+
+//обработка запроса с Фронта
+exP.get('/getCiCi',function (request,response){
+    //чтобы вернуть во Фронтенд данные с обеих таблиц, используем промисы
+
+    let citiesPromise = new Promise((resolve, reject)=>{
+        conn.query('SELECT * from Cities',(err,result) => {
+            if(err) reject (err);
+            resolve (result);
+        })
+    });
+
+    let citizenPromise = new Promise((resolve, reject)=>{
+        conn.query('SELECT * from Citizens',(err,result) => {
+            if(err) reject (err);
+            resolve (result);
+        })
+    });
+
+    Promise.all([citiesPromise, citizenPromise]).then(function (value) {
+        //console.log(value[1]);
+        response.send(JSON.parse(JSON.stringify({cities:value[0],citizens:value[1]})));
+    });
+})
 
 // считываем файл с горожанами в массив, выбираем одного, далее через запрос к БД создаём таблицу горожан
 fs.readFile('./taskFiles/updCitizens.json', (err, data) => {
@@ -53,7 +81,7 @@ fs.readFile('./taskFiles/cities.json', (err, data) => {
                 console.log(result)
             });
         }
-    })
+    });
 });
 
 /* Функция для создания SQL-запроса на создание таблицы горожан.
