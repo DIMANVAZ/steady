@@ -1,21 +1,23 @@
 <template>
-  <div class="hello">
+  <div class="main_container">
     <h1>{{ msg }}</h1>
-    <table>
+    <table class="main_table">
       <tr>
         <th v-for="field in Object.keys(citizens[0])" :key="field">{{field}}</th>
       </tr>
       <tr v-for="citizen in citizens" :key="citizen">
         <td v-for="(value,index) in citizen" :key="value" :class="index" :data-city="cityDetector(citizen)" @mouseover="onHover">{{value}}</td>
+
       </tr>
+      <div  id="tooltip"
+            :style="{ top: `${vertPos}px`, left: `${horizPos}px` }"
+            v-if="show"
+            @mouseout="clear"
+      >
+        {{ this.detectedCity }} жителей
+      </div>
     </table>
-            <div  id="tooltip"
-                  :style="{ top: `${vertPos}px`, left: `${horizPos}px` }"
-                  v-if="show"
-                  @mouseout="clear"
-            >
-              {{ this.detectedCity }} жителей
-            </div>
+
   </div>
 </template>
 
@@ -68,15 +70,17 @@ export default {
             .then(response => response.json())
         this.cities = citiesAndCitizens.cities;
         this.citizens = citiesAndCitizens.citizens;
-        console.log(this.citizens)
+        //console.log(this.citizens)
       } catch(e){ console.error(`Error from Ierarchical.vue/created(): `,e)}
     },
+    //определем город по совпадению id города и city_id жителя
     cityDetector(citizen){
       let match = this.cities.find(city => {
         return city.id === citizen.city_id;
       });
       return [match.name,match.data]
     },
+    //при наведении мыши, если у элемента класс = "name", покажем тултип
     onHover(e) {
       if(e.target.classList.value === 'name'){
 
@@ -88,6 +92,7 @@ export default {
         this.vertPos = pageY;
       }
     },
+    //скрыть тултип
     clear(){
       this.show = false;
     }
@@ -97,6 +102,16 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.main_container{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main_table{
+
+}
+
 h3 {
   margin: 40px 0 0;
 }
