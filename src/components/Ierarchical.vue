@@ -134,7 +134,7 @@ export default {
       Object.keys(p).forEach(key => {
         let els = document.getElementsByClassName(key);
         console.log(els)
-        let color = `${Math.random()*255},${100},${Math.random()*255}`
+        let color = `${Math.random()*255},${Math.random()*255},${Math.random()*255}`
         for (let node of els) {
           node.style = `border:2px solid rgb(${color});`
         }
