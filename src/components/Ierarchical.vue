@@ -6,18 +6,16 @@
         <th v-for="field in Object.keys(citizens[0])" :key="field">{{field}}</th>
       </tr>
       <tr v-for="citizen in citizens" :key="citizen">
-        <td v-for="value in Object.values(citizen)" :key="value" :class="x" :data="x">{{value}}</td>
-        <td @mouseover="onHover"></td>
-<!--        <div  id="tooltip"-->
-<!--              :style="{ top: `${clientY}px`, left: `${clientX}px` }"-->
-<!--              v-if="show"-->
-<!--              @mouseout="show = false"-->
-<!--        >-->
-<!--          {{ citizen.city_id }}-->
-<!--        </div>-->
+        <td v-for="(value,index) in citizen" :key="value" :class="index" :data-city="cityDetector(citizen)" @mouseover="onHover">{{value}}</td>
       </tr>
     </table>
-
+            <div  id="tooltip"
+                  :style="{ top: `${clientY}px`, left: `${clientX}px` }"
+                  v-if="show"
+                  @mouseout="clear"
+            >
+              {{ this.detectedCity }} жителей
+            </div>
   </div>
 </template>
 
@@ -54,6 +52,7 @@ export default {
     return{
       cities,
       citizens,
+      detectedCity:'',
       show: false,
       clientX: 0,
       clientY: 0
@@ -72,12 +71,28 @@ export default {
         console.log(this.citizens)
       } catch(e){ console.error(`Error from Ierarchical.vue/created(): `,e)}
     },
-    onHover(e) {
-      const { clientX, clientY } = e;
-      this.show = true;
-      this.clientX = clientX;
-      this.clientY = clientY;
+    cityDetector(citizen){
+      let match = this.cities.find(city => {
+        return city.id === citizen.city_id;
+      });
+      return [match.name,match.data]
     },
+    onHover(e) {
+      if(e.target.classList.value === 'name'){
+        console.log(e.target.dataset.city)
+        this.detectedCity = e.target.dataset.city;
+        const { clientX, clientY } = e;
+        this.show = true;
+        this.clientX = clientX;
+        this.clientY = clientY;
+      }
+    },
+    clear(){
+      this.show = false;
+      this.clientX = 0;
+      this.clientY = 0;
+      alert('clr')
+    }
   }
 }
 </script>
