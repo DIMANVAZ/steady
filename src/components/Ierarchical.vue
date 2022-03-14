@@ -1,29 +1,37 @@
 <template>
   <div class="main_container">
     <h1>{{ msg }}</h1>
-    <table class="main_table">
-      <tr>
-<!--        <th v-for="key in Object.keys(citizens[0])" :key="key" >{{key}}</th>-->
-        <th>Город</th>
-        <th>Район</th>
-        <th>Улица</th>
-        <th>Имя</th>
-      </tr>
-      <tr v-for="citizen in citizens" :key="citizen">
-<!--        <td v-for="(value,index) in citizen" :key="value" :class="index" :data-city="cityDetector(citizen)" @mouseover="onHover">{{value}}</td>-->
-        <td :class="citizen?.city">{{citizen?.city}}</td>
-        <td :class="citizen?.district">{{citizen?.district}}</td>
-        <td :class="citizen?.street">{{citizen?.street}}</td>
-        <td :data-city="cityDetector(citizen)" @mouseover="onHover" class="name">{{citizen?.name}}</td>
-      </tr>
-      <div  id="tooltip"
-            :style="{ top: `${vertPos}px`, left: `${horizPos}px` }"
-            v-if="show"
-            @mouseout="clear"
-      >
-        {{ this.detectedCity }} жителей
-      </div>
-    </table>
+    <details>
+      <summary class="all_cities_summary">Города</summary>
+      <details class="city_details" v-for="city in Object.keys(this.structured)" :key="city">
+        <summary class="city_summary">{{ city }}</summary>
+
+        <details class="district_details" v-for="district in Object.keys(this.structured[city])" :key="district">
+          <summary class="district_summary">{{ district }}</summary>
+
+          <details class="street_details" v-for="street in Object.keys(this.structured[city][district])" :key="street">
+            <summary class="street_summary" >{{ street }}</summary>
+
+            <div class="citizen_div"
+                 v-for="citizen in this.structured[city][district][street]"
+                 :key="citizen"
+                 :data-city="city"
+                 @mouseover="onHover"
+                 @mouseout="clear">
+              {{ citizen }}
+              <div  id="tooltip"
+                    :style="{ top: `${vertPos}px`, left: `${horizPos}px` }"
+                    v-if="show"
+              >
+                {{this.tooltip}}
+              </div>
+            </div>
+
+
+          </details>
+        </details>
+      </details>
+    </details>
 
   </div>
 </template>
@@ -31,26 +39,6 @@
 <script>
 import cities from '../../public/taskFiles/cities.json';
 import citizens from '../../public/taskFiles/updCitizens.json';
-
-/*/!*будем исходить из того, что в массиве groups тип адреса всегда идёт от большего к меньшему.
-то есть, страна-> город, город-> улица и т.д.*!/
-
-// 1. Сортируем по алфавиту по полям группы
-citizens.sort(function (citiz1, citiz2) {
-  for (let i = 0; i < citiz1.groups.length; i++) {
-  let res = citiz1.groups[i].name.localeCompare(citiz2.groups[i].name);
-    if(res !==0) {
-      return res;
-    }
-  }
-})
-
-// 2. Выносим поля группы и их значения в поля горожанина(для удобства доступа)
-// citizens.forEach(citizen => {
-//   citizen.groups.forEach(group => {
-//     citizen[group.type] = group.name
-//   })
-// })*/
 
 export default {
   name: 'HelloWorld',
@@ -61,7 +49,8 @@ export default {
     return{
       cities,
       citizens,
-      detectedCity:'',
+      structured:{},
+      tooltip:'',
       show: false,
       horizPos: 0,
       vertPos: 0
@@ -71,7 +60,7 @@ export default {
     this.fetcher();
   },
   updated() {
-    this.paint()
+
   },
   methods: {
     async fetcher(){//---запрос к серверу для получения городов и горожан из БД------
@@ -85,6 +74,7 @@ export default {
         this.citizens = citiesAndCitizens.citizens;
 
         this.sortAndChange();
+        this.structuring();
       } catch(e){ console.error(`Error from Ierarchical.vue/created(): `,e)}
     },
     //функция сортировки
@@ -97,56 +87,84 @@ export default {
           }
         }
       })
-      console.log(this.citizens)
     },
-    //определем город по совпадению id города и city_id жителя
-    cityDetector(citizen){
-      let match = this.cities.find(city => {
-        return city.id === citizen.city_id;
-      });
-      //console.log([match.name,match.data])
-      return [match.name,match.data]
+
+    // преобразование массива горожан в структурированный объект {cities:{districts:{streets:{names:{}}}}}
+    // надо бы отрефакторить...
+    structuring(){
+      let str = this.structured;
+      this.citizens.forEach(citizen => {
+        if(str[citizen.city] === undefined){
+          str[citizen.city] = {}
+        } else {
+          if(str[citizen.city][citizen.district] === undefined){
+            str[citizen.city][citizen.district]={}
+          } else {
+            if(str[citizen.city][citizen.district][citizen.street] === undefined){
+              str[citizen.city][citizen.district][citizen.street]=[]
+            } else {
+                str[citizen.city][citizen.district][citizen.street].push(citizen.name)
+            }
+          }
+        }
+      })
+      //console.log(this.structured)
+      //console.log(Object.keys(this.structured))
     },
+
     //при наведении мыши, если у элемента класс = "name", покажем тултип
     onHover(e) {
-      if(e.target.classList.value === 'name'){
+      let city = e.target.dataset.city;
 
-        this.detectedCity = e.target.dataset.city;
-        const { pageX,pageY } = e;
+      let trueCity = this.cities.find(nextCity => {
+        return nextCity.name.indexOf(city.slice(0, 5)) >= 0
+      });
 
-        this.show = true;
-        this.horizPos = pageX;
-        this.vertPos = pageY;
-      }
+      this.tooltip = `${trueCity.name}, ${trueCity.data} жителей`
+
+      const {pageX, pageY} = e;
+
+      this.show = true;
+      this.horizPos = pageX;
+      this.vertPos = pageY;
+
     },
     //скрыть тултип
     clear(){
+      this.tooltip = '';
       this.show = false;
     },
-    //выделить цветом ячейки
-    paint(){
-      let p = {};
-      document.querySelectorAll('td').forEach(domel => {
-        if(domel.classList.value !== 'name'){
-          p[domel.classList.value] = {}
-        }
-      })
-      Object.keys(p).forEach(key => {
-        let els = document.getElementsByClassName(key);
-        console.log(els)
-        let color = `${Math.random()*255},${Math.random()*255},${Math.random()*255}`
-        for (let node of els) {
-          node.style = `border:2px solid rgb(${color});`
-        }
-      })
-      console.log(p)
-    }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.all_cities_summary{
+  margin:5px;
+  color:orangered;
+}
+.city_summary{
+  color:forestgreen;
+}
+.district_summary{
+  color:dodgerblue;
+}
+.street_summary{
+  color:lightcoral;
+}
+
+.citizen_div{
+  font-style:italic;
+  margin:10px;
+}
+
+details{
+  text-align:left;
+  margin-top:10px;
+  margin-left:20px;
+}
+
 .main_container{
   display:flex;
   flex-direction: column;
@@ -154,7 +172,7 @@ export default {
 }
 
 .main_table{
-
+  margin-top:30px;
 }
 
 h3 {
