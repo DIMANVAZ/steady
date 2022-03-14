@@ -19,14 +19,14 @@
                  @mouseover="onHover"
                  @mouseout="clear">
               {{ citizen }}
-              <div  id="tooltip"
-                    :style="{ top: `${vertPos}px`, left: `${horizPos}px` }"
-                    v-if="show"
-              >
-                {{this.tooltip}}
-              </div>
-            </div>
 
+            </div>
+            <div  id="tooltip"
+                  :style="{ top: `${vertPos}px`, left: `${horizPos}px` }"
+                  v-if="show"
+            >
+              {{this.tooltip}}
+            </div>
 
           </details>
         </details>
@@ -90,20 +90,21 @@ export default {
     },
 
     // преобразование массива горожан в структурированный объект {cities:{districts:{streets:{names:{}}}}}
-    // надо бы отрефакторить...
     structuring(){
       let str = this.structured;
       this.citizens.forEach(citizen => {
-        if(str[citizen.city] === undefined){
-          str[citizen.city] = {}
+        const {city,district,street,name} = citizen;
+
+        if(str[city] === undefined){
+           str[city] = {}
         } else {
-          if(str[citizen.city][citizen.district] === undefined){
-            str[citizen.city][citizen.district]={}
+          if(str[city][district] === undefined){
+             str[city][district]={}
           } else {
-            if(str[citizen.city][citizen.district][citizen.street] === undefined){
-              str[citizen.city][citizen.district][citizen.street]=[]
+            if(str[city][district][street] === undefined){
+               str[city][district][street]=[]
             } else {
-                str[citizen.city][citizen.district][citizen.street].push(citizen.name)
+                str[city][district][street].push(name)
             }
           }
         }
@@ -112,7 +113,7 @@ export default {
       //console.log(Object.keys(this.structured))
     },
 
-    //при наведении мыши, если у элемента класс = "name", покажем тултип
+    //при наведении мыши просчитаем город и покажем тултип
     onHover(e) {
       let city = e.target.dataset.city;
 
